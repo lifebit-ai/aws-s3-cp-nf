@@ -49,9 +49,9 @@ process processA {
 	input:
 	val x from processAInput
 	val(a_file) from processAInputFiles
-
+	
 	script:
 	"""
-	${params.script}
+	${params.script} $a_file
 	"""
 }

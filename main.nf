@@ -45,31 +45,13 @@ processAInputFiles = Channel.fromPath("${params.dataLocation}/*${params.fileSuff
 process processA {
 	publishDir "${params.output}/${task.hash}", mode: 'copy'
 	tag "cpus: ${task.cpus}, cloud storage: ${cloud_storage_file}"
-	// beforeScript 'aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 196670327513.dkr.ecr.eu-west-2.amazonaws.com'
-	beforeScript "aws s3 cp ${params.s3_file_beforescript} ."
 	
 	input:
 	val x from processAInput
-	file(a_file) from processAInputFiles
-	each file("*") from ch_utils
-	each file("*") from ch_src
-
-	output:
-	val x into processAOutput
-	file "*.txt"
+	val(a_file) from processAInputFiles
 
 	script:
 	"""
-	# Simulate the time the processes takes to finish
-	pwd=`basename \${PWD} | cut -c1-6`
-	echo \$pwd
-	timeToWait=\$(shuf -i ${params.processATimeRange} -n 1)
-	for i in {1..${numberFilesForProcessA}};
-	do echo test > "\${pwd}"_file_\${i}.txt
-	sleep ${params.processATimeBetweenFileCreationInSecs}
-	done;
-	sleep \$timeToWait
-	echo "task cpus: ${task.cpus}"
-	ls -l
+	${params.script}
 	"""
 }
